@@ -25,14 +25,16 @@ const taskForm = reactive({
   tags: '',
 });
 
+const status = ref<'idle' | 'pending' | 'success' | 'error'>('idle');
+
 //title　のフォーム部分
-const formData: FormDataEntity = reactive({
-  title: '',
-  description: '',
-  priority: '',
-  tags: [],
-  expiresAt: '',
-});
+// const formData: FormDataEntity = reactive({
+//   title: '',
+//   description: '',
+//   priority: '',
+//   tags: [],
+//   expiresAt: '',
+// });
 // エラー時の対応
 // const errors: FormDataEntity = reactive({
 //   title: '',
@@ -59,47 +61,77 @@ const formData: FormDataEntity = reactive({
 //   }
 // };
 
-const addTag = () => {
-  const tag = tagInput.value.trim();
-  if (tag && !formData.tags.includes(tag)) {
-    formData.tags.push(tag);
-    tagInput.value = '';
+// const addTag = () => {
+//   const tag = tagInput.value.trim();
+//   if (tag && !formData.tags.includes(tag)) {
+//     formData.tags.push(tag);
+//     tagInput.value = '';
+//   }
+// };
+
+// const removeTag = (tagToRemove: string) => {
+//   const index = formData.tags.indexOf(tagToRemove);
+//   if (index > -1) {
+//     formData.tags.splice(index, 1);
+//   }
+// };
+
+// const getToday = () => {
+//   const today = new Date();
+//   return today.toISOString().split('T')[0];
+// };
+
+// const formDataAll = {
+//   title: formData.title,
+//   description: formData.description,
+//   priority: formData.priority,
+//   tags: formData.tags,
+//   expiresAt: formData.expiresAt,
+// };
+
+async function addTask() {
+  status.value = 'pending';
+  const requestURL = 'http://localhost:8787/api/v1/tasks';
+  const response = await fetch(requestURL, {
+    method: 'POST',
+    headers: {
+      'Content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      title: taskForm.title,
+      description: taskForm.description,
+      priority: taskForm.priority || undefined,
+      expiresAt: taskForm.expiresAt || undefined,
+      tags: taskForm.tags
+        .split(',')
+        .map(tag => tag.trim())
+        .filter(Boolean), // 後で調べる
+    }),
+  });
+
+  // HTTP ステータスコード が 200 以外の場合
+  if (!response.ok) {
+    status.value = 'error';
+    return;
   }
-};
+  // レスポンスのボディをJSONオブジェクトにパース
+  const data = await response.json();
+  console.log(data);
 
-const removeTag = (tagToRemove: string) => {
-  const index = formData.tags.indexOf(tagToRemove);
-  if (index > -1) {
-    formData.tags.splice(index, 1);
-  }
-};
+  status.value = 'success';
+}
 
-const getToday = () => {
-  const today = new Date();
-  return today.toISOString().split('T')[0];
-};
-
-const formDataAll = {
-  title: formData.title,
-  description: formData.description,
-  priority: formData.priority,
-  tags: formData.tags,
-  expiresAt: formData.expiresAt,
-};
-
-console.log(formData);
-console.log(formDataAll);
+function clearForm() {
+  taskForm.title = '';
+  taskForm.description = '';
+  taskForm.priority = '';
+  taskForm.expiresAt = '';
+  taskForm.tags = '';
+}
 </script>
 
 <template>
-  <div>---------------------------------------</div>
-  <span>挙動テスト領域</span>
-  <pre>title： {{ taskForm.title }} </pre>
-  <pre>description: {{ taskForm.description }} </pre>
-  <pre>priority: {{ taskForm.priority }} </pre>
-  <pre>expiresAt: {{ taskForm.expiresAt }} </pre>
-  <pre>tags: {{ taskForm.tags }} </pre>
-  <div>---------------------------------------</div>
+  <pre>{{ status }}</pre>
   <div class="about">
     <h1>タスク入力フォーム</h1>
     <form>
@@ -145,8 +177,10 @@ console.log(formDataAll);
       <label for="expiresAt" class="formLabel">期限（任意）</label>
       <input type="date" id="expiresAt" v-model="taskForm.expiresAt" />
       <h2>タスク登録</h2>
-      <button type="button" @click="">タスク登録</button>
-      <button type="button" @click="">クリア</button>
+      <button type="button" :disabled="status === 'pending'" @click="addTask">タスク登録</button>
+      <button type="button" @click="clearForm">クリア</button>
+      <p v-if="status === 'success'">タスクを作成しました</p>
+      <p v-if="status === 'error'">タスク作成に失敗しました</p>
     </form>
   </div>
 </template>
