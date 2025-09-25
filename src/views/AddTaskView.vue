@@ -27,68 +27,6 @@ const taskForm = reactive({
 
 const status = ref<'idle' | 'pending' | 'success' | 'error'>('idle');
 
-//title　のフォーム部分
-// const formData: FormDataEntity = reactive({
-//   title: '',
-//   description: '',
-//   priority: '',
-//   tags: [],
-//   expiresAt: '',
-// });
-// エラー時の対応
-// const errors: FormDataEntity = reactive({
-//   title: '',
-//   description: '',
-//   priority: '',
-//   tags: [],
-//   expiresAt: '',
-// });
-
-// const validateTitle = () => {
-//   if (!formData.title.trim()) {
-//     errors.title = 'タイトルは必須です';
-//   } else if (formData.title.length > 30) {
-//     errors.title = 'タイトルは30文字以内です';
-//   } else {
-//     errors.title = '';
-//   }
-// };
-
-// const handleSubmit = () => {
-//   validateTitle();
-//   if (!errors.title) {
-//     console.log('送信:', formData);
-//   }
-// };
-
-// const addTag = () => {
-//   const tag = tagInput.value.trim();
-//   if (tag && !formData.tags.includes(tag)) {
-//     formData.tags.push(tag);
-//     tagInput.value = '';
-//   }
-// };
-
-// const removeTag = (tagToRemove: string) => {
-//   const index = formData.tags.indexOf(tagToRemove);
-//   if (index > -1) {
-//     formData.tags.splice(index, 1);
-//   }
-// };
-
-// const getToday = () => {
-//   const today = new Date();
-//   return today.toISOString().split('T')[0];
-// };
-
-// const formDataAll = {
-//   title: formData.title,
-//   description: formData.description,
-//   priority: formData.priority,
-//   tags: formData.tags,
-//   expiresAt: formData.expiresAt,
-// };
-
 async function addTask() {
   status.value = 'pending';
   const requestURL = 'http://localhost:8787/api/v1/tasks';
