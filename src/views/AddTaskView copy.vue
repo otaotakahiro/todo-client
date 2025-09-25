@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { TaskEntity } from '@/entities/TaskEntity';
 import { TaskRepository } from '@/repositories/TaskRepository';
-import { taskRepository } from '@/store';
 import { reactive, ref } from 'vue';
 
 // interface TaskEntity {
@@ -32,13 +31,11 @@ const status = ref<'idle' | 'pending' | 'success' | 'error'>('idle');
 async function addTask() {
   status.value = 'pending';
 
-  try {
-    await taskRepository.createTasks(taskForm); // ここで
-  } catch (error) {
-    // 引数のerror部分はthrow に　newした内容が渡される
-    console.log(error);
-    status.value = 'error';
+  const taskRepository = new TaskRepository();
+  const task = await taskRepository.createTasks(taskForm);
 
+  if (!task) {
+    status.value = 'error';
     return;
   }
 

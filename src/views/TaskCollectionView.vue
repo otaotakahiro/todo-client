@@ -1,57 +1,19 @@
 <script setup lang="ts">
-import type { FormDataEntity } from '@/Entity/TaskEntity';
+import type { TaskEntity } from '@/entities/TaskEntity';
+import { TaskRepository } from '@/repositories/TaskRepository';
+import { taskRepository } from '@/store';
 import { ref } from 'vue';
 
-const tasks = ref<FormDataEntity[]>([
-  {
-    id: '07d42c3c-2fdc-4dec-b3a9-dda55f751aa7',
-    title: 'task1',
-    description: 'task詳細11111111',
-    status: 'pending',
-    priority: 'low',
-    tags: ['やる気', '元気', 'いわきNEW'],
-    startedAt: '2025-90-16',
-    expiresAt: '2025-90-15',
-    completedAt: '',
-  },
-  {
-    id: '11fd97df-711c-4998-8970-f876134f6f3b',
-    title: 'task2',
-    description: 'task詳細22222222222222',
-    status: 'pending',
-    priority: 'low',
-    tags: ['やる気', '元気', 'いわきNEW'],
-    startedAt: '',
-    expiresAt: '',
-    completedAt: '',
-  },
-  {
-    id: '2664efdf-a9b7-410b-b60c-736178186537',
-    title: 'task3',
-    description: 'task詳細3333333333333333',
-    status: 'pending',
-    priority: 'low',
-    tags: ['やる気', '元気', 'いわきNEW'],
-    startedAt: '',
-    expiresAt: '',
-    completedAt: '',
-  },
-]);
+const tasks = ref<TaskEntity[]>([]);
 
-void (async () => {
-  const response = await window.fetch(`http://localhost:8787/api/v1/tasks`, {
-    // method: 'GET',
-    headers: {
-      'Content-type': 'application/json',
-    },
-  });
-  const json = await response.json();
-  console.log(json);
-  tasks.value = json;
-})();
+async function getTasks() {
+  tasks.value = await taskRepository.getTasks();
+}
+
+getTasks();
 </script>
 <template>
-  <div>タスク一覧</div>
+  <div>タスク一覧（全{{ tasks.length }}件）</div>
   <RouterLink v-for="task of tasks" :key="task.id" :class="$style.tasksList" :to="`/task/${task.id}`">
     <div :class="$style.tasksTitle">
       <span>{{ task.id }}</span>
@@ -84,31 +46,37 @@ void (async () => {
   width: 100%;
 }
 .tasksTitle {
-  border: aliceblue solid;
-  width: 150px;
+  padding: 5px;
+  border: aliceblue solid 0.5px;
+  width: 100%;
 }
 .tasksDescription {
-  border: aliceblue solid;
-  width: 300px;
+  padding: 5px;
+  border: aliceblue solid 0.5px;
+  width: 100%;
 }
 
 .tasksPriority {
-  border: aliceblue solid;
-  width: 100px;
+  padding: 5px;
+  border: aliceblue solid 0.5px;
+  width: 100%;
 }
 
 .tasksTags {
-  border: aliceblue solid;
+  padding: 5px;
+  border: aliceblue solid 0.5px;
   width: 100%;
 }
 
 .tasksExpiresat {
-  border: aliceblue solid;
+  padding: 5px;
+  border: aliceblue solid 0.5px;
   width: 100%;
 }
 
 .tasksCompletedat {
-  border: aliceblue solid;
+  padding: 5px;
+  border: aliceblue solid 0.5px;
   width: 100%;
 }
 </style>
