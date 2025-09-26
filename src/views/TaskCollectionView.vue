@@ -11,6 +11,19 @@ async function getTasks() {
 }
 
 getTasks();
+
+async function deleteTask(taskId: string) {
+  try {
+    await taskRepository.deleteTask(taskId);
+    const taskIndex = tasks.value.findIndex(task => task.id === taskId); // findIndex で
+
+    if (taskIndex !== -1) {
+      tasks.value.splice(taskIndex, 1);
+    }
+  } catch {
+    console.log('タスクの削除に失敗しました');
+  }
+}
 </script>
 <template>
   <div>タスク一覧（全{{ tasks.length }}件）</div>
@@ -59,7 +72,7 @@ getTasks();
         <button type="button" @click="" :class="$style.tasksButton">
           <RouterLink :class="$style.tasksButtonLink" :to="`/tasks/${task.id}`">編集</RouterLink>
         </button>
-        <button type="button" @click="" :class="$style.tasksButtonDelete">削除</button>
+        <button type="button" @click="deleteTask(task.id)" :class="$style.tasksButtonDelete">削除</button>
       </div>
     </div>
   </div>
