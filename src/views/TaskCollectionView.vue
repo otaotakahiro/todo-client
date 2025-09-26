@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import TaskDialog from '@/components/TaskDialog.vue';
 import type { TaskEntity } from '@/entities/TaskEntity';
 import { TaskRepository } from '@/repositories/TaskRepository';
 import { taskRepository } from '@/store';
@@ -30,6 +31,7 @@ async function updataTask(task: TaskEntity) {
 }
 </script>
 <template>
+  <TaskDialog />
   <div>タスク一覧（全{{ tasks.length }}件）</div>
   <div :class="$style.tasksContainer">
     <!-- 見出し行を追加 -->
