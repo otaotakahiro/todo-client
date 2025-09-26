@@ -56,4 +56,15 @@ export class TaskRepository {
 
     return data;
   }
+
+  public async deleteTask(taskId: string): Promise<void> {
+    // throw new Error(); 強制的にthrowで停止させて動作チェックする
+    const response = await fetch(`${this.baseUrl}/api/v1/tasks/${taskId}`, {
+      method: 'DELETE',
+    });
+
+    if (!response.ok) {
+      throw new Error('エラーが発生しました');
+    }
+  }
 }
