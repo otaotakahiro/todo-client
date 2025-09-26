@@ -24,6 +24,10 @@ async function deleteTask(taskId: string) {
     console.log('タスクの削除に失敗しました');
   }
 }
+
+async function updataTask(task: TaskEntity) {
+  console.log(task);
+}
 </script>
 <template>
   <div>タスク一覧（全{{ tasks.length }}件）</div>
@@ -69,9 +73,7 @@ async function deleteTask(taskId: string) {
         <span>{{ task.completedAt }}</span>
       </div>
       <div :class="$style.buttonContainer">
-        <button type="button" @click="" :class="$style.tasksButton">
-          <RouterLink :class="$style.tasksButtonLink" :to="`/tasks/${task.id}`">編集</RouterLink>
-        </button>
+        <button type="button" @click="updataTask(task)" :class="$style.tasksButton">更新</button>
         <button type="button" @click="deleteTask(task.id)" :class="$style.tasksButtonDelete">削除</button>
       </div>
     </div>
