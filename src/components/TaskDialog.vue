@@ -1,18 +1,47 @@
 <script setup lang="ts">
 import type { TaskEntity } from '@/entities/TaskEntity';
+import { reactive, watch } from 'vue';
 
-// プロパティの定義
+// 状態管理のは親側TaskCollectionViewで　動作管理はtaskDialogで行っている
+// 親から子がprops　子から親は自分で作る
+
+const taskForm = reactive({
+  title: '',
+  description: '',
+  priority: '',
+  expiresAt: '',
+  tags: '',
+});
+
 const props = defineProps<{
-  task: TaskEntity; // 更新対象のタスク
-  isVisible: boolean; // ダイアログの表示状態
+  task: TaskEntity;
 }>();
 
-// イベントの定義
-const emit = defineEmits<{
-  update: [task: TaskEntity]; // タスク更新時
-  close: []; // ダイアログを閉じる時
-  cancel: []; // キャンセル時
-}>();
+// 監視したいリアクティブな変数を第一引数
+// 変更があったときに実行する関数｀
+watch(
+  props,
+  newProps => {
+    // watchで監視
+    console.log(newProps);
+    taskForm.title = newProps.task.title;
+    taskForm.description = newProps.task.description ?? '';
+    taskForm.priority = newProps.task.priority ?? '';
+    taskForm.expiresAt = newProps.task.expiresAt ?? '';
+    taskForm.tags = newProps.task.tags.join(',');
+  },
+  { immediate: true },
+);
+
+const emits = defineEmits<{
+  (event: 'close'): void;
+}>(); // シグナルの種類を定義した
+
+function onClose() {
+  emits('close'); // ここでイベントを発火させる　×ボタンを押下するとおｎClose関数が動く
+  //閉じるボタンが押されて動作する動きを作る。動作確認する場合、console.logでちゃんと動作するかを確認するを一つ一つ行う
+  console.log(new Date());
+}
 </script>
 
 <template>
@@ -20,11 +49,12 @@ const emit = defineEmits<{
     <div class="dialog">
       <div class="header">
         <h2>タスク更新</h2>
-        <button type="button" class="closeButton">×</button>
+        <button type="button" class="closeButton" @click="onClose">×</button>
       </div>
 
       <div class="content">
         <form>
+          <pre>{{ taskForm }}</pre>
           <!-- タスクタイトル -->
           <div class="formGroup">
             <h3>タスクタイトル</h3>
@@ -36,7 +66,9 @@ const emit = defineEmits<{
               placeholder="タイトルを入力してください"
               class="formInput"
               required
+              v-model="taskForm.title"
             />
+            <pre>{{ task.title }}</pre>
           </div>
 
           <!-- 説明文 -->
@@ -49,13 +81,14 @@ const emit = defineEmits<{
               placeholder="タスクの詳細を入力してください"
               rows="3"
               class="formTextarea"
+              v-model="taskForm.description"
             ></textarea>
           </div>
 
           <!-- 優先度 -->
           <div class="formGroup">
             <h3>優先度</h3>
-            <select id="priority" class="formSelect">
+            <select id="priority" class="formSelect" v-model="taskForm.priority">
               <option value="">-</option>
               <option value="low">低</option>
               <option value="medium">中</option>
@@ -74,14 +107,14 @@ const emit = defineEmits<{
           <div class="formGroup">
             <h3>期限</h3>
             <label for="expiresAt" class="formLabel">期限（任意）</label>
-            <input type="date" id="expiresAt" class="formInput" />
+            <input type="date" id="expiresAt" class="formInput" v-model="taskForm.expiresAt" />
           </div>
 
           <!-- ボタン -->
           <div class="buttonGroup">
             <button type="submit" class="updateButton">タスク更新</button>
             <button type="button" class="clearButton">リセット</button>
-            <button type="button" class="cancelButton">キャンセル</button>
+            <button type="button" class="cancelButton" @click="onClose">キャンセル</button>
           </div>
 
           <div class="successMessage" style="display: none">タスクを更新しました</div>

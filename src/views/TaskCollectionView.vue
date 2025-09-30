@@ -26,12 +26,26 @@ async function deleteTask(taskId: string) {
   }
 }
 
+const selectedTask = ref<TaskEntity>(); // 更新ボタンを押したときにtaskを引数として取得しているのでそれを格納する変数を宣言する
 async function updataTask(task: TaskEntity) {
-  console.log(task);
+  // 更新ボタンを押すと@clickで実行されてここが動く
+  isDialogOpened.value = true;
+
+  // 選択されたタスクを格納する
+  selectedTask.value = task;
 }
+
+const isDialogOpened = ref(false); // 最初にfalseを入れて非表示にさせる TaskDialog を表示非表示させる
+
+function closeDialog() {
+  isDialogOpened.value = false;
+}
+
+// 変数が更新されるとき<pre>で表示動作確認をすること <pre></pre>
 </script>
 <template>
-  <TaskDialog />
+  <TaskDialog v-if="isDialogOpened && selectedTask" :task="selectedTask" @close="closeDialog" />
+
   <div>タスク一覧（全{{ tasks.length }}件）</div>
   <div :class="$style.tasksContainer">
     <!-- 見出し行を追加 -->
