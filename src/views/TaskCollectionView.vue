@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import TaskDialog from '@/components/TaskDialog.vue';
+import TaskDialog, { type TaskForm } from '@/components/TaskDialog.vue';
 import type { TaskEntity } from '@/entities/TaskEntity';
 import { TaskRepository } from '@/repositories/TaskRepository';
 import { taskRepository } from '@/store';
@@ -12,6 +12,30 @@ async function getTasks() {
 }
 
 getTasks();
+
+async function updateTask(task: TaskForm) {
+  // 選択されたタスクがない場合、何もしない
+  if (!selectedTask.value) {
+    return;
+  }
+  //サーバーのタスクを更新する
+  const updatedTask = await taskRepository.updateTask(
+    selectedTask.value.id,
+    task,
+  ); /** 書き方　まずTaskDialogで関数と引数を作る、その後戻ってきて関数に与える引数を記載*/
+
+  // 更新したタスクを配列に反映する
+  const taskIndex = tasks.value.findIndex(task => task.id === updatedTask.id);
+
+  if (taskIndex !== -1) {
+    tasks.value[taskIndex] = updatedTask;
+  }
+
+  //ダイヤログを閉じる
+  isDialogOpened.value = false;
+  // selectTaskを空にする
+  selectedTask.value = undefined;
+}
 
 async function deleteTask(taskId: string) {
   try {
@@ -27,7 +51,7 @@ async function deleteTask(taskId: string) {
 }
 
 const selectedTask = ref<TaskEntity>(); // 更新ボタンを押したときにtaskを引数として取得しているのでそれを格納する変数を宣言する
-async function updataTask(task: TaskEntity) {
+async function openDialog(task: TaskEntity) {
   // 更新ボタンを押すと@clickで実行されてここが動く
   isDialogOpened.value = true;
 
@@ -44,7 +68,7 @@ function closeDialog() {
 // 変数が更新されるとき<pre>で表示動作確認をすること <pre></pre>
 </script>
 <template>
-  <TaskDialog v-if="isDialogOpened && selectedTask" :task="selectedTask" @close="closeDialog" />
+  <TaskDialog v-if="isDialogOpened && selectedTask" :task="selectedTask" @accept="updateTask" @cancel="closeDialog" />
 
   <div>タスク一覧（全{{ tasks.length }}件）</div>
   <div :class="$style.tasksContainer">
@@ -89,7 +113,7 @@ function closeDialog() {
         <span>{{ task.completedAt }}</span>
       </div>
       <div :class="$style.buttonContainer">
-        <button type="button" @click="updataTask(task)" :class="$style.tasksButton">更新</button>
+        <button type="button" @click="openDialog(task)" :class="$style.tasksButton">更新</button>
         <button type="button" @click="deleteTask(task.id)" :class="$style.tasksButtonDelete">削除</button>
       </div>
     </div>
