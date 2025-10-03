@@ -8,6 +8,14 @@ interface CreateTaskRequest {
   tags: string;
 }
 
+interface UpdateTaskRequest {
+  title: string;
+  description: string;
+  priority: string;
+  expiresAt: string;
+  tags: string;
+}
+
 /*
  *サーバーとTaskのやりとりを担当するクラス
  */
@@ -53,6 +61,35 @@ export class TaskRepository {
       },
     });
     const data: TaskEntity[] = await response.json();
+
+    return data;
+  }
+
+  //タスク更新
+  public async updateTask(taskId: string, updateTaskRequest: UpdateTaskRequest): Promise<TaskEntity> {
+    const response = await fetch(`${this.baseUrl}/api/v1/tasks/${taskId}`, {
+      method: 'PUT',
+      headers: {
+        Accept: 'application/json',
+        'Content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        title: updateTaskRequest.title,
+        description: updateTaskRequest.description,
+        priority: updateTaskRequest.priority || undefined,
+        expiresAt: updateTaskRequest.expiresAt || undefined,
+        tags: updateTaskRequest.tags
+          .split(',')
+          .map(tag => tag.trim())
+          .filter(Boolean), // 後で調べる
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('エラーが発生しました');
+    }
+
+    const data: TaskEntity = await response.json();
 
     return data;
   }

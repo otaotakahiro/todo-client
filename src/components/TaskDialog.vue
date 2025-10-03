@@ -1,11 +1,22 @@
 <script setup lang="ts">
 import type { TaskEntity } from '@/entities/TaskEntity';
+import { OperationCanceledException } from 'typescript';
 import { reactive, watch } from 'vue';
 
 // 状態管理のは親側TaskCollectionViewで　動作管理はtaskDialogで行っている
 // 親から子がprops　子から親は自分で作る
 
-const taskForm = reactive({
+// 親から子→子で内容を更新してreactiveでその内容をリアルタイムに反映、更新ボタンを押したらemitで親が accept を使えるようにして親側でデータを受け取れるようにする
+
+export interface TaskForm {
+  title: string;
+  description: string;
+  priority: string;
+  expiresAt: string;
+  tags: string;
+}
+
+const taskForm = reactive<TaskForm>({
   title: '',
   description: '',
   priority: '',
@@ -34,13 +45,17 @@ watch(
 );
 
 const emits = defineEmits<{
-  (event: 'close'): void;
+  (event: 'accept', newtTask: TaskForm): void; // typeof を調べる
+  (event: 'cancel'): void;
 }>(); // シグナルの種類を定義した
 
 function onClose() {
-  emits('close'); // ここでイベントを発火させる　×ボタンを押下するとおｎClose関数が動く
+  emits('cancel'); // ここでイベントを発火させる　×ボタンを押下するとおｎClose関数が動く
   //閉じるボタンが押されて動作する動きを作る。動作確認する場合、console.logでちゃんと動作するかを確認するを一つ一つ行う
   console.log(new Date());
+}
+function onAccept() {
+  emits('accept', taskForm); // イベントを発火させる
 }
 </script>
 
@@ -112,7 +127,8 @@ function onClose() {
 
           <!-- ボタン -->
           <div class="buttonGroup">
-            <button type="submit" class="updateButton">タスク更新</button>
+            <button type="button" class="updateButton" @click="onAccept">タスク更新</button
+            ><!--submitは使わない-->
             <button type="button" class="clearButton">リセット</button>
             <button type="button" class="cancelButton" @click="onClose">キャンセル</button>
           </div>
