@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import TaskDialog from '@/components/TaskDialog.vue';
 import type { TaskEntity } from '@/entities/TaskEntity';
 import { TaskRepository } from '@/repositories/TaskRepository';
 import { taskRepository } from '@/store';
@@ -24,8 +25,27 @@ async function deleteTask(taskId: string) {
     console.log('タスクの削除に失敗しました');
   }
 }
+
+const selectedTask = ref<TaskEntity>(); // 更新ボタンを押したときにtaskを引数として取得しているのでそれを格納する変数を宣言する
+async function updataTask(task: TaskEntity) {
+  // 更新ボタンを押すと@clickで実行されてここが動く
+  isDialogOpened.value = true;
+
+  // 選択されたタスクを格納する
+  selectedTask.value = task;
+}
+
+const isDialogOpened = ref(false); // 最初にfalseを入れて非表示にさせる TaskDialog を表示非表示させる
+
+function closeDialog() {
+  isDialogOpened.value = false;
+}
+
+// 変数が更新されるとき<pre>で表示動作確認をすること <pre></pre>
 </script>
 <template>
+  <TaskDialog v-if="isDialogOpened && selectedTask" :task="selectedTask" @close="closeDialog" />
+
   <div>タスク一覧（全{{ tasks.length }}件）</div>
   <div :class="$style.tasksContainer">
     <!-- 見出し行を追加 -->
@@ -69,9 +89,7 @@ async function deleteTask(taskId: string) {
         <span>{{ task.completedAt }}</span>
       </div>
       <div :class="$style.buttonContainer">
-        <button type="button" @click="" :class="$style.tasksButton">
-          <RouterLink :class="$style.tasksButtonLink" :to="`/tasks/${task.id}`">編集</RouterLink>
-        </button>
+        <button type="button" @click="updataTask(task)" :class="$style.tasksButton">更新</button>
         <button type="button" @click="deleteTask(task.id)" :class="$style.tasksButtonDelete">削除</button>
       </div>
     </div>
